@@ -29,7 +29,7 @@ if they refuse to die.
 You can install `portkill` in one line:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kedimuzafer/portkill/main/portkill-install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/kedimuzafer/portkill/master/portkill-install.sh | sh
 ```
 
 The installer will:
