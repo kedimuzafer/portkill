@@ -136,6 +136,8 @@ _portkill_uninstall() {
   fi
 
   tmp="${rc}.portkill.tmp.$$"
+  trap 'rm -f "$tmp"' EXIT INT TERM
+
   awk '
     BEGIN { in_block = 0 }
     /# >>> portkill >>>/ { in_block = 1; next }
@@ -199,7 +201,7 @@ USAGE
   fi
 
   # Normalize and uniquify PIDs
-  pids="$(printf '%s\n' $pids | tr ' ' '\n' | sed 's/[^0-9]//g' | sed '/^$/d' | sort -u)"
+  pids="$(printf '%s\n' "$pids" | tr ' ' '\n' | sed 's/[^0-9]//g' | sed '/^$/d' | sort -u)"
 
   if [ -z "$pids" ]; then
     printf 'portkill: could not extract any valid PIDs for port %s\n' "$port" >&2
@@ -210,7 +212,7 @@ USAGE
 
   # Try graceful then forceful kill
   kill $pids 2>/dev/null || true
-  sleep 0.2
+  sleep 0.5
   kill -9 $pids 2>/dev/null || true
 }
 EOF
