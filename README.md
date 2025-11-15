@@ -14,7 +14,9 @@ if they refuse to die.
 
 ## Features
 
-- Simple, single function: `portkill <port>`
+- Simple command: `portkill <port>`
+- Built‑in help: `portkill -h` / `portkill --help`
+- Uninstaller: `portkill uninstall` (or `remove` / `delete`)
 - Works in any POSIX shell once sourced (`bash`, `zsh`, etc.)
 - Uses `lsof` and `fuser` if available
 - Safe installer: adds a clearly marked block to your shell rc file and skips
@@ -24,10 +26,10 @@ if they refuse to die.
 
 ## Installation
 
-Once this repository is on GitHub, you can install `portkill` in one line:
+You can install `portkill` in one line:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/<your-user>/portkill/main/portkill-install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/kedimuzafer/portkill/main/portkill-install.sh | sh
 ```
 
 The installer will:
@@ -71,6 +73,7 @@ Then:
 ```bash
 portkill 3003
 portkill 8080
+portkill -h
 ```
 
 Behavior:
@@ -81,12 +84,27 @@ Behavior:
   - `kill <pids>`
   - `kill -9 <pids>`
 
+### Uninstall from the CLI
+
+You can remove the `portkill` block from your shell rc file using:
+
+```bash
+portkill uninstall
+# or
+portkill remove
+# or
+portkill delete
+```
+
+Internally this looks for the block between the markers described below and
+removes it from the detected rc file.
+
 ---
 
-## Uninstall
+## Manual uninstall
 
-To uninstall `portkill`, open the rc file you installed it into (for example
-`~/.zshrc` or `~/.bashrc`) and remove the block between:
+If you prefer to remove `portkill` manually, open the rc file you installed it
+into (for example `~/.zshrc` or `~/.bashrc`) and delete the block between:
 
 ```text
 # >>> portkill >>>
@@ -99,4 +117,3 @@ Then reload your shell config:
 ```bash
 . ~/.zshrc    # or your file
 ```
-

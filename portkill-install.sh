@@ -90,7 +90,81 @@ append_portkill_block() {
     printf '\n%s\n' "$PORTKILL_MARK_START"
     cat <<'EOF'
 # portkill - kill whatever listens on a given TCP port
+
+_portkill_detect_rc() {
+  if [ "${PORTKILL_RC:-}" != "" ] && [ -f "$PORTKILL_RC" ]; then
+    printf '%s\n' "$PORTKILL_RC"
+    return 0
+  fi
+
+  home="${HOME:-$PWD}"
+
+  # Try to find the rc file that actually contains the portkill block
+  for candidate in \
+    "$home/.zshrc" \
+    "$home/.bashrc" \
+    "$home/.bash_profile" \
+    "$home/.profile"
+  do
+    if [ -f "$candidate" ] && grep -q "# >>> portkill >>>" "$candidate" 2>/dev/null; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+
+  # Fallback – best guess
+  printf '%s\n' "$home/.zshrc"
+}
+
+_portkill_uninstall() {
+  rc="$(_portkill_detect_rc)"
+
+  if [ ! -f "$rc" ]; then
+    printf 'portkill: rc file not found: %s\n' "$rc" >&2
+    return 1
+  fi
+
+  if ! grep -q "# >>> portkill >>>" "$rc" 2>/dev/null; then
+    printf 'portkill: no portkill block found in %s\n' "$rc"
+    return 0
+  fi
+
+  tmp="${rc}.portkill.tmp.$$"
+  awk '
+    BEGIN { in_block = 0 }
+    /# >>> portkill >>>/ { in_block = 1; next }
+    /# <<< portkill <</  { in_block = 0; next }
+    in_block == 0 { print }
+  ' "$rc" > "$tmp" && mv "$tmp" "$rc"
+
+  printf 'portkill: removed from %s\n' "$rc"
+}
+
 portkill() {
+  # Subcommands / flags
+  case "${1:-}" in
+    -h|--help|help)
+      cat <<'USAGE'
+portkill - kill whatever listens on a given TCP port
+
+Usage:
+  portkill <port>          Kill whatever is listening on <port>
+  portkill -h | --help     Show this help
+  portkill uninstall       Remove the portkill block from your shell rc file
+  portkill remove|delete   Alias for "uninstall"
+
+Examples:
+  portkill 3003
+  portkill 8080
+USAGE
+      return 0
+      ;;
+    uninstall|remove|delete)
+      _portkill_uninstall
+      return $?
+      ;;
+  esac
+
   if [ -z "$1" ]; then
     printf 'Usage: portkill <port>\n' >&2
     return 1
