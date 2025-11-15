@@ -231,9 +231,21 @@ main() {
 
   echo
   echo "portkill: installation complete."
-  echo "         Reload your shell config, e.g.:"
-  echo "           . \"$rc_file\""
-  echo "         Then run: portkill 3003"
+  echo "         Reloading shell..."
+
+  # Auto-reload shell based on current shell type
+  shell_name="$(basename "${SHELL:-sh}")"
+  case "$shell_name" in
+    zsh)
+      exec zsh
+      ;;
+    bash)
+      exec bash
+      ;;
+    *)
+      echo "         Please reload manually: . \"$rc_file\""
+      ;;
+  esac
 }
 
 main "$@"
